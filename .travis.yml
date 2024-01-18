@@ -1,0 +1,14 @@
+sudo: required
+services:
+  - docker
+before_install:
+    #download from curl then store output in /dev/null
+  - curl https://sdk.cloud..google.com | bash > /dev/null;
+    #look at the default dir of gc-sdk, execute the file within that dir
+    #for setting up google cloud locally in our machine
+  - source $HOME/google-cloud-sdk/path.bash.inc
+    #install and update kubectl
+  - gcloud components update kubectl 
+    #activate-service-account == IAM in AWS;
+    #tell gc-sdk by setting up account with credential in service-account.json
+  - gcloud auth activate-service-account --key-file service-account.json
