@@ -11,8 +11,8 @@ before_install:
     #This is done after encrypting the service-account file; For decrypting service-account.json.enc to service-account.json
   - openssl aes-256-cbc -K $encrypted_9f3b5599b056_key -iv $encrypted_9f3b5599b056_iv -in service-account.json.enc -out service-account.json -d
     #download from curl then store output in /dev/null
-  - CLOUDSDK_PYTHON=python3.8
-  - curl https://sdk.cloud.google.com | bash > /dev/null;
+  - export CLOUDSDK_PYTHON=python3.8
+  - curl https://sdk.cloud.google.com | CLOUDSDK_PYTHON=python3.8 bash > /dev/null;
     #look at the default dir of gc-sdk, execute the file within that dir
     #for setting up google cloud locally in our machine
   - source $HOME/google-cloud-sdk/path.bash.inc
