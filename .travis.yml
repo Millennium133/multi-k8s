@@ -1,7 +1,14 @@
 sudo: required
 services:
   - docker
+env:
+  global:
+    - SHA=$(git rev-parse HEAD)
+    # make sure no prompto
+    - CLOUDSDK_CORE_DISABLE_PROMPTS=1
 before_install:
+    #This is done after encrypting the service-account file; For decrypting service-account.json.enc to service-account.json
+  - openssl aes-256-cbc -K $encrypted_9f3b5599b056_key -iv $encrypted_9f3b5599b056_iv -in service-account.json.enc -out service-account.json -d
     #download from curl then store output in /dev/null
   - curl https://sdk.cloud..google.com | bash > /dev/null;
     #look at the default dir of gc-sdk, execute the file within that dir
@@ -12,3 +19,21 @@ before_install:
     #activate-service-account == IAM in AWS;
     #tell gc-sdk by setting up account with credential in service-account.json
   - gcloud auth activate-service-account --key-file service-account.json
+    
+  ### CONFIGURATION ###
+  #multi-k8s-411612 is my project id in gcloud
+  - gcloud config set project multi-k8s-411612
+  - gcloud config set compute/zone asia-southeast1-a
+  - gcloud container clusters get-credentials multi-cluster
+  
+  - echo "$DOCKER_PASSWORD" | docker login -u "$DOCKER_USERNAME" --password-stdin
+  - docker build -t millennium133/react-test -f ./client/Dockerfile.dev ./client
+
+script:
+  - docker run -e CI=true millennium133/react-test npm test 
+
+deploy:
+  provider: script
+  script: bash ./deploy.sh
+  on:
+    branch: master
